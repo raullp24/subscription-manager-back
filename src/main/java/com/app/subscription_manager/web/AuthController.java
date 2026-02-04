@@ -14,7 +14,6 @@ import com.app.subscription_manager.dtos.UserPrivateDTO;
 import com.app.subscription_manager.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
