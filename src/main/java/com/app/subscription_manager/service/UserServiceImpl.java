@@ -1,9 +1,14 @@
 package com.app.subscription_manager.service;
 
+import javax.management.RuntimeErrorException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.app.subscription_manager.config.JwtUtil;
+import com.app.subscription_manager.dtos.LoginRequestDTO;
+import com.app.subscription_manager.dtos.LoginResponseDTO;
 import com.app.subscription_manager.dtos.RegisterUserDTO;
 import com.app.subscription_manager.dtos.UserPrivateDTO;
 import com.app.subscription_manager.model.Users;
@@ -17,6 +22,9 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public UserPrivateDTO createUser(RegisterUserDTO registerUserDTO) {
@@ -33,6 +41,21 @@ public class UserServiceImpl implements UserService{
 
         return new UserPrivateDTO(userRepository.save(user));
 
+    }
+
+    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO){
+
+        Users user = userRepository.findByEmail(loginRequestDTO.getEmail()).orElseThrow(() -> new RuntimeException("Invalid Credentials"));
+
+        if(!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())){
+            throw new RuntimeException("Invalid credentials");
+        }
+
+        String token = jwtUtil.generateToken(loginRequestDTO.getEmail());
+
+        UserPrivateDTO userPrivateDTO = new UserPrivateDTO(user);
+
+        return new LoginResponseDTO(token,userPrivateDTO);
     }
 
     

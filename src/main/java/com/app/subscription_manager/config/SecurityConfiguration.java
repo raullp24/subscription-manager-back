@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.app.subscription_manager.service.CustomUsersDetailsService;
 
@@ -15,7 +16,10 @@ import com.app.subscription_manager.service.CustomUsersDetailsService;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    public SecurityConfiguration(){
+    private JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfiguration(JwtAuthFilter jwtAuthFilter){
+        this.jwtAuthFilter = jwtAuthFilter;
 
     }
 
@@ -24,8 +28,12 @@ public class SecurityConfiguration {
 
         http.csrf(csrf-> csrf.disable())
             .authorizeHttpRequests(authorize -> authorize
-            .anyRequest().permitAll()
-        );
+            .requestMatchers(HttpMethod.POST,"/api/auth/register").permitAll()
+            .requestMatchers(HttpMethod.POST,"/api/auth/login").permitAll()
+            .requestMatchers(HttpMethod.GET,"/api/auth/test").authenticated()
+            .anyRequest().authenticated()
+        )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -33,10 +41,5 @@ public class SecurityConfiguration {
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
-
-    @Bean
-    public CustomUsersDetailsService userDetailsService() {
-    return new CustomUsersDetailsService();
-  }
 
 }
