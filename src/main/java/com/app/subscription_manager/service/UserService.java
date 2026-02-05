@@ -9,6 +9,9 @@ import com.app.subscription_manager.dtos.LoginRequestDTO;
 import com.app.subscription_manager.dtos.LoginResponseDTO;
 import com.app.subscription_manager.dtos.RegisterUserDTO;
 import com.app.subscription_manager.dtos.UserPrivateDTO;
+import com.app.subscription_manager.exception.InvalidCredentialsException;
+import com.app.subscription_manager.exception.UserAlreadyExistsException;
+import com.app.subscription_manager.exception.UserNotFoundException;
 import com.app.subscription_manager.model.Users;
 import com.app.subscription_manager.repository.UserRepository;
 
@@ -24,10 +27,10 @@ public class UserService{
     @Autowired
     private JwtUtil jwtUtil;
 
-    public UserPrivateDTO createUser(RegisterUserDTO registerUserDTO) {
+    public UserPrivateDTO createUser(RegisterUserDTO registerUserDTO) throws UserAlreadyExistsException{
 
         if(userRepository.existsByEmail(registerUserDTO.getEmail())){
-            throw new RuntimeException("User with email: " + registerUserDTO.getEmail() + " already exists");
+            throw new UserAlreadyExistsException(registerUserDTO.getEmail());
         }
         
         Users user = new Users();
@@ -40,12 +43,12 @@ public class UserService{
 
     }
 
-    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO){
+    public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) throws UserNotFoundException,InvalidCredentialsException{
 
-        Users user = userRepository.findByEmail(loginRequestDTO.getEmail()).orElseThrow(() -> new RuntimeException("Invalid Credentials"));
+        Users user = userRepository.findByEmail(loginRequestDTO.getEmail()).orElseThrow(() -> new UserNotFoundException(loginRequestDTO.getEmail()));
 
         if(!passwordEncoder.matches(loginRequestDTO.getPassword(), user.getPassword())){
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
         String token = jwtUtil.generateToken(loginRequestDTO.getEmail());
