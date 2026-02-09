@@ -36,8 +36,10 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/test").authenticated()
                         .requestMatchers(HttpMethod.POST,"/api/subscriptions").authenticated()
+                        .requestMatchers(HttpMethod.POST,"/api/subscriptions/**/cancel").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/subscriptions").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/subscriptions/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT,"/api/subscriptions/**").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/subscriptions/user/**").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

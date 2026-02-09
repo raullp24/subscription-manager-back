@@ -1,5 +1,6 @@
 package com.app.subscription_manager.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,13 @@ public class SubscriptionService {
 
     public SubscriptionDTO create(@Valid InputSubscriptionDTO inputSubscriptionDTO){
         Subscription subscription = new Subscription(inputSubscriptionDTO);
+        if(!inputSubscriptionDTO.getAutoRenewal()){
+            if(inputSubscriptionDTO.getPeriodicity().equals("monthly")){
+                subscription.setEndDate(subscription.getStartDate().plusMonths(1));
+            } else if(inputSubscriptionDTO.getPeriodicity().equals("yearly")){
+                subscription.setEndDate(subscription.getStartDate().plusYears(1));
+            }
+        }
         return new SubscriptionDTO(subscriptionRepository.save(subscription));
     }
 
@@ -42,5 +50,40 @@ public class SubscriptionService {
 
     public SubscriptionDTO findById(String id) throws SubscriptionNotFoundException {
         return subscriptionRepository.findById(id).map(SubscriptionDTO::new).orElseThrow(() -> new SubscriptionNotFoundException(id));
+    }
+
+    public SubscriptionDTO update(String id, @Valid InputSubscriptionDTO inputSubscriptionDTO) throws SubscriptionNotFoundException {
+        Subscription subscription = subscriptionRepository.findById(id).orElseThrow(() -> new SubscriptionNotFoundException(id));
+        subscription.setName(inputSubscriptionDTO.getName());
+        subscription.setPrice(inputSubscriptionDTO.getPrice());
+        subscription.setDescription(inputSubscriptionDTO.getDescription());
+        subscription.setAutoRenewal(inputSubscriptionDTO.getAutoRenewal());
+        subscription.setPeriodicity(inputSubscriptionDTO.getPeriodicity());
+        subscription.setEndDate(inputSubscriptionDTO.getEndDate());
+        subscription.setPrice(inputSubscriptionDTO.getPrice());
+        return new SubscriptionDTO(subscriptionRepository.save(subscription));
+    }
+
+    public SubscriptionDTO cancel(String id) throws SubscriptionNotFoundException {
+        Subscription subscription = subscriptionRepository.findById(id).orElseThrow(() -> new SubscriptionNotFoundException(id));
+        subscription.setStatus("cancelled");
+        LocalDate currentDate = LocalDate.now();
+        LocalDate nextRenewal = subscription.getStartDate();
+        if(subscription.getAutoRenewal()){
+            if(subscription.getPeriodicity().equals("monthly")){
+                while(!nextRenewal.isAfter(currentDate)){
+                    nextRenewal = nextRenewal.plusMonths(1);
+                }
+                subscription.setEndDate(nextRenewal);
+            } else if(subscription.getPeriodicity().equals("yearly")){
+                while(!nextRenewal.isAfter(currentDate)){
+                    nextRenewal = nextRenewal.plusYears(1);
+                }
+                subscription.setEndDate(nextRenewal);
+            }
+            subscription.setEndDate(nextRenewal);
+            subscription.setAutoRenewal(false);
+        }
+        return new SubscriptionDTO(subscriptionRepository.save(subscription));
     }
 }

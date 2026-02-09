@@ -2,6 +2,7 @@ package com.app.subscription_manager.web;
 
 import java.util.List;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 
@@ -52,8 +55,16 @@ public class SubscriptionController {
         return ResponseEntity.status(HttpStatus.OK).body(subscriptionDTO);
     }
 
-    
-    
-    
+    @PutMapping("/{id}")
+    public ResponseEntity<SubscriptionDTO> updateSubscription(@PathVariable String id, @Valid @RequestBody InputSubscriptionDTO inputSubscriptionDTO){
+        SubscriptionDTO subscriptionDTO = subscriptionService.update(id,inputSubscriptionDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(subscriptionDTO);
+    }
 
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<SubscriptionDTO> cancelSubscription(@PathVariable String id){
+        SubscriptionDTO subscriptionDTO = subscriptionService.cancel(id);
+        return ResponseEntity.status(HttpStatus.OK).body(subscriptionDTO);
+    }
+    
 }
