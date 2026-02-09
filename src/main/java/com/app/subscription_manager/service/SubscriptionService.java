@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.app.subscription_manager.dtos.InputSubscriptionDTO;
 import com.app.subscription_manager.dtos.SubscriptionDTO;
+import com.app.subscription_manager.exception.SubscriptionNotFoundException;
 import com.app.subscription_manager.exception.UserNotFoundException;
 import com.app.subscription_manager.model.Subscription;
 import com.app.subscription_manager.repository.SubscriptionRepository;
@@ -37,5 +38,9 @@ public class SubscriptionService {
             throw new UserNotFoundException(userId);
         }
         return subscriptionRepository.findByUserId(userId).stream().map(SubscriptionDTO::new).toList();
+    }
+
+    public SubscriptionDTO findById(String id) throws SubscriptionNotFoundException {
+        return subscriptionRepository.findById(id).map(SubscriptionDTO::new).orElseThrow(() -> new SubscriptionNotFoundException(id));
     }
 }

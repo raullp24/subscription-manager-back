@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,6 +29,7 @@ public class SecurityConfiguration {
 
         http
                 .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
@@ -35,6 +37,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/auth/test").authenticated()
                         .requestMatchers(HttpMethod.POST,"/api/subscriptions").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/subscriptions").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/subscriptions/**").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/subscriptions/user/**").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
