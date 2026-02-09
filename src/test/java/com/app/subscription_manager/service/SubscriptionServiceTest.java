@@ -47,7 +47,7 @@ class SubscriptionServiceTest {
         inputSubscriptionDTO.setDescription("Servicio de streaming de películas y series");
         inputSubscriptionDTO.setStatus("ACTIVE");
         inputSubscriptionDTO.setStartDate(LocalDate.of(2024, 1, 1));
-        inputSubscriptionDTO.setPeriodicity("MONTHLY");
+        inputSubscriptionDTO.setPeriodicity("monthly");
         inputSubscriptionDTO.setAutoRenewal(true);
         inputSubscriptionDTO.setPrice(15.99);
 
@@ -58,13 +58,13 @@ class SubscriptionServiceTest {
         subscription.setDescription("Servicio de streaming de películas y series");
         subscription.setStatus("ACTIVE");
         subscription.setStartDate(LocalDate.of(2024, 1, 1));
-        subscription.setPeriodicity("MONTHLY");
+        subscription.setPeriodicity("monthly");
         subscription.setAutoRenewal(true);
         subscription.setPrice(15.99);
     }
 
     @Test
-    void create_ShouldReturnSubscriptionDTO() {
+    void create() {
 
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(subscription);
 
@@ -76,14 +76,14 @@ class SubscriptionServiceTest {
         assertEquals("Servicio de streaming de películas y series", result.getDescription());
         assertEquals("ACTIVE", result.getStatus());
         assertEquals(LocalDate.of(2024, 1, 1), result.getStartDate());
-        assertEquals("MONTHLY", result.getPeriodicity());
+        assertEquals("monthly", result.getPeriodicity());
         assertTrue(result.getAutoRenewal());
         assertEquals(15.99, result.getPrice());
         verify(subscriptionRepository, times(1)).save(any(Subscription.class));
     }
 
     @Test
-    void findAll_ShouldReturnListOfSubscriptions() {
+    void findAll() {
 
         Subscription subscription2 = new Subscription();
         subscription2.setId("sub456");
@@ -92,10 +92,10 @@ class SubscriptionServiceTest {
         subscription2.setDescription("Servicio de streaming de música");
         subscription2.setStatus("ACTIVE");
         subscription2.setStartDate(LocalDate.of(2024, 2, 1));
-        subscription2.setPeriodicity("MONTHLY");
+        subscription2.setPeriodicity("monthly");
         subscription2.setAutoRenewal(true);
         subscription2.setPrice(9.99);
-        
+
         when(subscriptionRepository.findAll()).thenReturn(Arrays.asList(subscription, subscription2));
 
         List<SubscriptionDTO> result = subscriptionService.findAll();
@@ -109,7 +109,7 @@ class SubscriptionServiceTest {
     void findByUserId_WhenUserExists() throws UserNotFoundException {
         Users user = new Users();
         user.setId("user123");
-        
+
         when(userRepository.findById("user123")).thenReturn(Optional.of(user));
         when(subscriptionRepository.findByUserId("user123")).thenReturn(Arrays.asList(subscription));
 
@@ -122,7 +122,7 @@ class SubscriptionServiceTest {
         assertEquals("Servicio de streaming de películas y series", result.get(0).getDescription());
         assertEquals("ACTIVE", result.get(0).getStatus());
         assertEquals(LocalDate.of(2024, 1, 1), result.get(0).getStartDate());
-        assertEquals("MONTHLY", result.get(0).getPeriodicity());
+        assertEquals("monthly", result.get(0).getPeriodicity());
         assertTrue(result.get(0).getAutoRenewal());
         assertEquals(15.99, result.get(0).getPrice());
         verify(userRepository, times(1)).findById("user123");
@@ -152,7 +152,7 @@ class SubscriptionServiceTest {
         assertEquals("Servicio de streaming de películas y series", result.getDescription());
         assertEquals("ACTIVE", result.getStatus());
         assertEquals(LocalDate.of(2024, 1, 1), result.getStartDate());
-        assertEquals("MONTHLY", result.getPeriodicity());
+        assertEquals("monthly", result.getPeriodicity());
         assertTrue(result.getAutoRenewal());
         assertEquals(15.99, result.getPrice());
         verify(subscriptionRepository, times(1)).findById("sub123");
@@ -167,4 +167,55 @@ class SubscriptionServiceTest {
         });
         verify(subscriptionRepository, times(1)).findById("nonexistent");
     }
+
+    @Test
+void updateSubscription() throws SubscriptionNotFoundException {
+    InputSubscriptionDTO updateDTO = new InputSubscriptionDTO();
+    updateDTO.setUserId("user123");
+    updateDTO.setName("Netflix Updated");
+    updateDTO.setDescription("Updated description");
+    updateDTO.setStartDate(LocalDate.of(2024, 1, 1));
+    updateDTO.setPeriodicity("monthly");
+    updateDTO.setAutoRenewal(false);
+    updateDTO.setPrice(19.99);
+
+    when(subscriptionRepository.findById("sub123")).thenReturn(Optional.of(subscription));
+    when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    SubscriptionDTO result = subscriptionService.update("sub123", updateDTO);
+
+    assertNotNull(result);
+    assertEquals("sub123", result.getId());
+    assertEquals("Netflix Updated", result.getName());
+    assertEquals("Updated description", result.getDescription());
+    assertEquals(LocalDate.of(2024, 1, 1), result.getStartDate());
+    assertEquals("monthly", result.getPeriodicity());
+    assertFalse(result.getAutoRenewal());
+    assertEquals(19.99, result.getPrice());
+    verify(subscriptionRepository, times(1)).findById("sub123");
+    verify(subscriptionRepository, times(1)).save(any(Subscription.class));
+}
+
+@Test
+void cancelSubscription() throws SubscriptionNotFoundException {
+    subscription.setStartDate(LocalDate.of(2026, 1, 1));
+    subscription.setPeriodicity("monthly");
+    
+    when(subscriptionRepository.findById("sub123")).thenReturn(Optional.of(subscription));
+    when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+    SubscriptionDTO result = subscriptionService.cancel("sub123");
+
+    assertNotNull(result);
+    assertEquals("sub123", result.getId());
+    assertEquals("cancelled", result.getStatus());
+    assertEquals(LocalDate.of(2026, 1, 1), result.getStartDate());
+    assertEquals(LocalDate.of(2026, 3, 1), result.getEndDate());
+    assertEquals("monthly", result.getPeriodicity());
+    assertFalse(result.getAutoRenewal());
+    verify(subscriptionRepository, times(1)).findById("sub123");
+    verify(subscriptionRepository, times(1)).save(any(Subscription.class));
+}
+
+    
 }

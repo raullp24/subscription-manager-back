@@ -67,7 +67,8 @@ class SubscriptionControllerTest {
 
         mockMvc.perform(post("/api/subscriptions")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"userId\":\"user123\",\"name\":\"Netflix\",\"description\":\"Streaming platform\",\"status\":\"active\",\"startDate\":\"2024-01-01\",\"periodicity\":\"monthly\",\"autoRenewal\":true,\"price\":15.99}"))
+                .content(
+                        "{\"userId\":\"user123\",\"name\":\"Netflix\",\"description\":\"Streaming platform\",\"status\":\"active\",\"startDate\":\"2024-01-01\",\"periodicity\":\"monthly\",\"autoRenewal\":true,\"price\":15.99}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value("sub123"))
                 .andExpect(jsonPath("$.userId").value("user123"))
@@ -148,5 +149,58 @@ class SubscriptionControllerTest {
                 .andExpect(jsonPath("$[1].name").value("Amazon Prime"));
 
         verify(subscriptionService, times(1)).findByUserId("user123");
+    }
+
+    @Test
+    void testUpdateSubscription() throws Exception {
+        SubscriptionDTO updatedSubscription = new SubscriptionDTO();
+        updatedSubscription.setId("sub123");
+        updatedSubscription.setUserId("user123");
+        updatedSubscription.setName("Netflix Updated");
+        updatedSubscription.setDescription("Updated description");
+        updatedSubscription.setStatus("active");
+        updatedSubscription.setStartDate(LocalDate.of(2024, 1, 1));
+        updatedSubscription.setPeriodicity("monthly");
+        updatedSubscription.setAutoRenewal(true);
+        updatedSubscription.setPrice(19.99);
+
+        when(subscriptionService.update(eq("sub123"), any(InputSubscriptionDTO.class))).thenReturn(updatedSubscription);
+
+        mockMvc.perform(put("/api/subscriptions/sub123")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        "{\"userId\":\"user123\",\"name\":\"Netflix Updated\",\"description\":\"Updated description\",\"status\":\"active\",\"startDate\":\"2024-01-01\",\"periodicity\":\"monthly\",\"autoRenewal\":true,\"price\":19.99}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("sub123"))
+                .andExpect(jsonPath("$.name").value("Netflix Updated"))
+                .andExpect(jsonPath("$.description").value("Updated description"))
+                .andExpect(jsonPath("$.price").value(19.99));
+
+        verify(subscriptionService, times(1)).update(eq("sub123"), any(InputSubscriptionDTO.class));
+    }
+
+    @Test
+    void testCancelSubscription() throws Exception {
+        subscriptionDTO.setStartDate(LocalDate.of(2026, 1, 1));
+        SubscriptionDTO cancelledSubscription = new SubscriptionDTO();
+        cancelledSubscription.setId("sub123");
+        cancelledSubscription.setUserId("user123");
+        cancelledSubscription.setName("Netflix");
+        cancelledSubscription.setDescription("Streaming platform");
+        cancelledSubscription.setStatus("cancelled");
+        cancelledSubscription.setStartDate(LocalDate.of(2026, 3, 1));
+        cancelledSubscription.setPeriodicity("monthly");
+        cancelledSubscription.setAutoRenewal(false);
+        cancelledSubscription.setPrice(15.99);
+
+        when(subscriptionService.cancel(eq("sub123"))).thenReturn(cancelledSubscription);
+
+        mockMvc.perform(post("/api/subscriptions/sub123/cancel")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("sub123"))
+                .andExpect(jsonPath("$.status").value("cancelled"));
+
+        verify(subscriptionService, times(1)).cancel(eq("sub123"));
     }
 }
