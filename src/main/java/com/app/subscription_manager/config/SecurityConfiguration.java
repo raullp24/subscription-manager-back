@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET,"/api/subscriptions/**").authenticated()
                         .requestMatchers(HttpMethod.PUT,"/api/subscriptions/**").authenticated()
                         .requestMatchers(HttpMethod.GET,"/api/subscriptions/user/**").authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/email/send-email").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

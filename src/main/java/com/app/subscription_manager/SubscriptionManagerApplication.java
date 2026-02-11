@@ -2,10 +2,12 @@ package com.app.subscription_manager;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
 @SpringBootApplication
+@EnableScheduling
 public class SubscriptionManagerApplication {
 
 	public static void main(String[] args) {
