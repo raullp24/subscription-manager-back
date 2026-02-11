@@ -10,6 +10,7 @@ import com.app.subscription_manager.dtos.InputSubscriptionDTO;
 import com.app.subscription_manager.dtos.SubscriptionDTO;
 import com.app.subscription_manager.exception.SubscriptionNotFoundException;
 import com.app.subscription_manager.exception.UserNotFoundException;
+import com.app.subscription_manager.model.Periodicity;
 import com.app.subscription_manager.model.Subscription;
 import com.app.subscription_manager.repository.SubscriptionRepository;
 import com.app.subscription_manager.repository.UserRepository;
@@ -58,7 +59,7 @@ public class SubscriptionService {
         subscription.setPrice(inputSubscriptionDTO.getPrice());
         subscription.setDescription(inputSubscriptionDTO.getDescription());
         subscription.setAutoRenewal(inputSubscriptionDTO.getAutoRenewal());
-        subscription.setPeriodicity(inputSubscriptionDTO.getPeriodicity());
+        subscription.setPeriodicity(Periodicity.valueOf(inputSubscriptionDTO.getPeriodicity()));
         subscription.setEndDate(inputSubscriptionDTO.getEndDate());
         subscription.setPrice(inputSubscriptionDTO.getPrice());
         return new SubscriptionDTO(subscriptionRepository.save(subscription));
@@ -70,12 +71,12 @@ public class SubscriptionService {
         LocalDate currentDate = LocalDate.now();
         LocalDate nextRenewal = subscription.getStartDate();
         if(subscription.getAutoRenewal()){
-            if(subscription.getPeriodicity().equals("monthly")){
+            if(subscription.getPeriodicity().equals(Periodicity.MONTHLY)){
                 while(!nextRenewal.isAfter(currentDate)){
                     nextRenewal = nextRenewal.plusMonths(1);
                 }
                 subscription.setEndDate(nextRenewal);
-            } else if(subscription.getPeriodicity().equals("yearly")){
+            } else if(subscription.getPeriodicity().equals(Periodicity.YEARLY)){
                 while(!nextRenewal.isAfter(currentDate)){
                     nextRenewal = nextRenewal.plusYears(1);
                 }

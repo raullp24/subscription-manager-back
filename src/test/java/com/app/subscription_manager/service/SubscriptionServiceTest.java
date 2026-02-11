@@ -4,6 +4,7 @@ import com.app.subscription_manager.dtos.InputSubscriptionDTO;
 import com.app.subscription_manager.dtos.SubscriptionDTO;
 import com.app.subscription_manager.exception.SubscriptionNotFoundException;
 import com.app.subscription_manager.exception.UserNotFoundException;
+import com.app.subscription_manager.model.Periodicity;
 import com.app.subscription_manager.model.Subscription;
 import com.app.subscription_manager.model.Users;
 import com.app.subscription_manager.repository.SubscriptionRepository;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.access.method.P;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -47,7 +49,7 @@ class SubscriptionServiceTest {
         inputSubscriptionDTO.setDescription("Servicio de streaming de películas y series");
         inputSubscriptionDTO.setStatus("ACTIVE");
         inputSubscriptionDTO.setStartDate(LocalDate.of(2024, 1, 1));
-        inputSubscriptionDTO.setPeriodicity("monthly");
+        inputSubscriptionDTO.setPeriodicity("MONTHLY");
         inputSubscriptionDTO.setAutoRenewal(true);
         inputSubscriptionDTO.setPrice(15.99);
 
@@ -58,7 +60,7 @@ class SubscriptionServiceTest {
         subscription.setDescription("Servicio de streaming de películas y series");
         subscription.setStatus("ACTIVE");
         subscription.setStartDate(LocalDate.of(2024, 1, 1));
-        subscription.setPeriodicity("monthly");
+        subscription.setPeriodicity(Periodicity.MONTHLY);
         subscription.setAutoRenewal(true);
         subscription.setPrice(15.99);
     }
@@ -76,7 +78,7 @@ class SubscriptionServiceTest {
         assertEquals("Servicio de streaming de películas y series", result.getDescription());
         assertEquals("ACTIVE", result.getStatus());
         assertEquals(LocalDate.of(2024, 1, 1), result.getStartDate());
-        assertEquals("monthly", result.getPeriodicity());
+        assertEquals("MONTHLY", result.getPeriodicity());
         assertTrue(result.getAutoRenewal());
         assertEquals(15.99, result.getPrice());
         verify(subscriptionRepository, times(1)).save(any(Subscription.class));
@@ -92,7 +94,7 @@ class SubscriptionServiceTest {
         subscription2.setDescription("Servicio de streaming de música");
         subscription2.setStatus("ACTIVE");
         subscription2.setStartDate(LocalDate.of(2024, 2, 1));
-        subscription2.setPeriodicity("monthly");
+        subscription2.setPeriodicity(Periodicity.MONTHLY);
         subscription2.setAutoRenewal(true);
         subscription2.setPrice(9.99);
 
@@ -122,7 +124,7 @@ class SubscriptionServiceTest {
         assertEquals("Servicio de streaming de películas y series", result.get(0).getDescription());
         assertEquals("ACTIVE", result.get(0).getStatus());
         assertEquals(LocalDate.of(2024, 1, 1), result.get(0).getStartDate());
-        assertEquals("monthly", result.get(0).getPeriodicity());
+        assertEquals("MONTHLY", result.get(0).getPeriodicity());
         assertTrue(result.get(0).getAutoRenewal());
         assertEquals(15.99, result.get(0).getPrice());
         verify(userRepository, times(1)).findById("user123");
@@ -152,7 +154,7 @@ class SubscriptionServiceTest {
         assertEquals("Servicio de streaming de películas y series", result.getDescription());
         assertEquals("ACTIVE", result.getStatus());
         assertEquals(LocalDate.of(2024, 1, 1), result.getStartDate());
-        assertEquals("monthly", result.getPeriodicity());
+        assertEquals("MONTHLY", result.getPeriodicity());
         assertTrue(result.getAutoRenewal());
         assertEquals(15.99, result.getPrice());
         verify(subscriptionRepository, times(1)).findById("sub123");
@@ -175,7 +177,7 @@ void updateSubscription() throws SubscriptionNotFoundException {
     updateDTO.setName("Netflix Updated");
     updateDTO.setDescription("Updated description");
     updateDTO.setStartDate(LocalDate.of(2024, 1, 1));
-    updateDTO.setPeriodicity("monthly");
+    updateDTO.setPeriodicity(Periodicity.MONTHLY.name());
     updateDTO.setAutoRenewal(false);
     updateDTO.setPrice(19.99);
 
@@ -189,7 +191,7 @@ void updateSubscription() throws SubscriptionNotFoundException {
     assertEquals("Netflix Updated", result.getName());
     assertEquals("Updated description", result.getDescription());
     assertEquals(LocalDate.of(2024, 1, 1), result.getStartDate());
-    assertEquals("monthly", result.getPeriodicity());
+    assertEquals("MONTHLY", result.getPeriodicity());
     assertFalse(result.getAutoRenewal());
     assertEquals(19.99, result.getPrice());
     verify(subscriptionRepository, times(1)).findById("sub123");
@@ -199,7 +201,7 @@ void updateSubscription() throws SubscriptionNotFoundException {
 @Test
 void cancelSubscription() throws SubscriptionNotFoundException {
     subscription.setStartDate(LocalDate.of(2026, 1, 1));
-    subscription.setPeriodicity("monthly");
+    subscription.setPeriodicity(Periodicity.MONTHLY);
     
     when(subscriptionRepository.findById("sub123")).thenReturn(Optional.of(subscription));
     when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -211,7 +213,7 @@ void cancelSubscription() throws SubscriptionNotFoundException {
     assertEquals("cancelled", result.getStatus());
     assertEquals(LocalDate.of(2026, 1, 1), result.getStartDate());
     assertEquals(LocalDate.of(2026, 3, 1), result.getEndDate());
-    assertEquals("monthly", result.getPeriodicity());
+    assertEquals("MONTHLY", result.getPeriodicity());
     assertFalse(result.getAutoRenewal());
     verify(subscriptionRepository, times(1)).findById("sub123");
     verify(subscriptionRepository, times(1)).save(any(Subscription.class));

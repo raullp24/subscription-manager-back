@@ -32,7 +32,7 @@ public class SubscriptionDTO {
         this.description = subscription.getDescription();
         this.status = subscription.getStatus();
         this.startDate = subscription.getStartDate();
-        this.periodicity = subscription.getPeriodicity();
+        this.periodicity = subscription.getPeriodicity().toString();
         this.autoRenewal = subscription.getAutoRenewal();
         this.price = subscription.getPrice();
         this.endDate = subscription.getEndDate();

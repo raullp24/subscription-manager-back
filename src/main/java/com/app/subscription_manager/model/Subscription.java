@@ -33,7 +33,7 @@ public class Subscription {
     private LocalDate startDate;
     private LocalDate endDate;
     @NotNull
-    private String periodicity;
+    private Periodicity periodicity;
     @NotNull
     private Boolean autoRenewal;
     @NotNull
@@ -46,7 +46,7 @@ public class Subscription {
         this.description = inputSubscriptionDTO.getDescription();
         this.status = inputSubscriptionDTO.getStatus();
         this.startDate = inputSubscriptionDTO.getStartDate();
-        this.periodicity = inputSubscriptionDTO.getPeriodicity();
+        this.periodicity = Periodicity.valueOf(inputSubscriptionDTO.getPeriodicity());
         this.autoRenewal = inputSubscriptionDTO.getAutoRenewal();
         this.price = inputSubscriptionDTO.getPrice();
     }
