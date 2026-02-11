@@ -29,9 +29,9 @@ public class SubscriptionService {
     public SubscriptionDTO create(@Valid InputSubscriptionDTO inputSubscriptionDTO){
         Subscription subscription = new Subscription(inputSubscriptionDTO);
         if(!inputSubscriptionDTO.getAutoRenewal()){
-            if(inputSubscriptionDTO.getPeriodicity().equals("monthly")){
+            if(inputSubscriptionDTO.getPeriodicity().equals(Periodicity.MONTHLY.name())){
                 subscription.setEndDate(subscription.getStartDate().plusMonths(1));
-            } else if(inputSubscriptionDTO.getPeriodicity().equals("yearly")){
+            } else if(inputSubscriptionDTO.getPeriodicity().equals(Periodicity.YEARLY.name())){
                 subscription.setEndDate(subscription.getStartDate().plusYears(1));
             }
         }
