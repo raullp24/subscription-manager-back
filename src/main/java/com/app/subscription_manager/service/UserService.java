@@ -58,7 +58,22 @@ public class UserService{
         return new LoginResponseDTO(token,userPrivateDTO);
     }
 
-    
+    public UserPrivateDTO update(String id, UserPrivateDTO userPrivateDTO) throws UserNotFoundException{
 
+        Users user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 
+        user.setName(userPrivateDTO.getName());
+        user.setSurname(userPrivateDTO.getSurname());
+
+        return new UserPrivateDTO(userRepository.save(user));
+    }
+
+    public UserPrivateDTO changePassword(String id, String newPassword) throws UserNotFoundException{
+
+        Users user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        return new UserPrivateDTO(userRepository.save(user));
+    }
 }

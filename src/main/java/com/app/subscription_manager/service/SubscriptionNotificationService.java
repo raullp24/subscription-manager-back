@@ -30,7 +30,7 @@ public class SubscriptionNotificationService {
     @Autowired
     private UserRepository userRepository;
 
-    @Scheduled(cron = "0 0 11 * * ?")
+    @Scheduled(cron = "0 10 9 * * ?")
     public void checkSubscriptionsForNotification() {
         log.info("Verificando suscripciones para notificación...");
 

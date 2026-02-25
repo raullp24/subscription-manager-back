@@ -18,7 +18,7 @@ public class UserPrivateDTO {
     public UserPrivateDTO(Users user){
         this.id  = user.getId();
         this.name = user.getName();
-        this.surname = user.getName();
+        this.surname = user.getSurname();
         this.email = user.getEmail();
     }
 
