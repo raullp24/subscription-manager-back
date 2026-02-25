@@ -28,9 +28,9 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
     }
 
-    @PostMapping("/change-password/{id}")
-    public ResponseEntity<Void> changePassword(@PathVariable String id, @RequestBody ChangePasswordDTO newPassword){
-        userService.changePassword(id, newPassword.getNewPassword());
+    @PostMapping("/change-password/{user_id}")
+    public ResponseEntity<Void> changePassword(@PathVariable("user_id") String userId, @RequestBody ChangePasswordDTO newPassword){
+        userService.changePassword(userId, newPassword);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

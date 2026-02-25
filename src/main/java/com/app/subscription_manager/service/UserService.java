@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.app.subscription_manager.config.JwtUtil;
+import com.app.subscription_manager.dtos.ChangePasswordDTO;
 import com.app.subscription_manager.dtos.LoginRequestDTO;
 import com.app.subscription_manager.dtos.LoginResponseDTO;
 import com.app.subscription_manager.dtos.RegisterUserDTO;
@@ -68,11 +69,11 @@ public class UserService{
         return new UserPrivateDTO(userRepository.save(user));
     }
 
-    public UserPrivateDTO changePassword(String id, String newPassword) throws UserNotFoundException{
+    public UserPrivateDTO changePassword(String id, ChangePasswordDTO newPassword) throws UserNotFoundException{
 
         Users user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
 
         return new UserPrivateDTO(userRepository.save(user));
     }
